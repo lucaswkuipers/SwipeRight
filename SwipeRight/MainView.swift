@@ -3,11 +3,9 @@ import UIKit
 final class MainView: UIView {
     private let possibleDirections: [UISwipeGestureRecognizer.Direction] = [.up, .down, .left, .right]
 
-    private var currentDirection: UISwipeGestureRecognizer.Direction = .up {
-        didSet {
-            currentDirectionLabel.text = "\(currentDirection.name)"
-        }
-    }
+    private var currentDirection: UISwipeGestureRecognizer.Direction = .up
+
+    private var isMeaning = false
 
     let currentDirectionLabel: UILabel = {
         let label = UILabel()
@@ -15,10 +13,27 @@ final class MainView: UIView {
         return label
     }()
 
+    let currentDirectionImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "arrow.up")
+        return imageView
+    }()
+
+    let modeLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Icon"
+        return label
+    }()
+
+    let statusLabel: UILabel = {
+        let label = UILabel()
+        return label
+    }()
+
     init() {
         super.init(frame: .zero)
 
-        setNewDirection()
+        setDirection()
         setupViewStyle()
         setupGestures()
         setupViewHierarchy()
@@ -34,13 +49,17 @@ final class MainView: UIView {
 
         if direction == currentDirection {
             print("Correct!")
+            statusLabel.text = "Correct!"
+
+            statusLabel.backgroundColor = .green
         } else {
             print("Wrong!")
+            statusLabel.text = "Wrong!"
+            statusLabel.backgroundColor = .red
         }
 
         print(direction.name)
-
-        setNewDirection()
+        setDirection()
     }
 
     private func setupViewStyle() {
@@ -66,6 +85,9 @@ final class MainView: UIView {
 
     private func setupViewHierarchy() {
         addSubview(currentDirectionLabel)
+        addSubview(currentDirectionImageView)
+        addSubview(modeLabel)
+        addSubview(statusLabel)
     }
 
     private func setupViewConstraints() {
@@ -73,16 +95,36 @@ final class MainView: UIView {
 
         NSLayoutConstraint.activate([
             currentDirectionLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            currentDirectionLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
+            currentDirectionLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            currentDirectionImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            currentDirectionImageView.topAnchor.constraint(equalTo: currentDirectionLabel.bottomAnchor),
+
+            modeLabel.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20),
+            modeLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+
+            statusLabel.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            statusLabel.centerXAnchor.constraint(equalTo: centerXAnchor)
         ])
     }
 
-    private func setNewDirection() {
+    private func setDirection() {
+        isMeaning = Bool.random()
+
+        backgroundColor = isMeaning ? .red : .green
+
         let shouldChangeDirection = Bool.random()
         guard shouldChangeDirection else { return }
 
-        guard let newDirection = possibleDirections.randomElement() else { return }
-        currentDirection = newDirection
+        guard let newWrittenDirection = possibleDirections.randomElement() else { return }
+        currentDirectionLabel.text = "\(currentDirection.name)"
+
+        guard let newIconDirection = possibleDirections.randomElement() else { return }
+        currentDirectionImageView.image = UIImage(systemName: "arrow.\(newIconDirection.name)")
+
+        currentDirection = isMeaning ? newWrittenDirection : newIconDirection
+
+        modeLabel.text = isMeaning ? "Written" : "Icon"
     }
 }
 
